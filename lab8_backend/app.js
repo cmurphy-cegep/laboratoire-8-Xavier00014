@@ -54,11 +54,54 @@ class BasicStrategyModified extends BasicStrategy {
 
 // passport.use( ... à compléter ... );
 
+passport.use(new BasicStrategy((username, password, cb) => {
+  userAccountQueries.getLoginByUserAccountId(username).then(utilisateur => {
+    if (!utilisateur) {
+      // L'utilisateur est introuvable, on appelle le callback cb
+      // avec false en 2e paramètre
+      return cb(null, false);
+    }
+
+    const iterations = 100000;
+    const keylen = 64;
+    const digest = "sha512";
+
+    crypto.pbkdf2(password, utilisateur.passwordSalt, iterations, keylen, digest, (err, hashedPassword) => {
+      if (err) {
+        return cb(err);
+      }
+
+      const utilisateurMdpHashBuffer = Buffer.from(utilisateur.passwordHash, "base64");
+
+      if (!crypto.timingSafeEqual(utilisateurMdpHashBuffer, hashedPassword)) {
+        return cb(null, false);
+      }
+
+      return cb(null, utilisateur);
+    });
+  }).catch(err => {
+    return cb(err);
+  });
+}));
+
 
 app.use('/products', productRouter);
 app.use('/cart', cartRouter);
 app.use('/orders', orderRouter);
+app.get('/login',
+  passport.authenticate('basic', { session: false }),
+  (req, res, next) => {
+    if (req.user) {
+      const userDetails = {
+        nomCompte: req.user.nomCompte,
+        isAdmin: req.user.isAdmin
+      };
 
+      res.json(userDetails);
+    } else {
+      return next({ status: 500, message: "Propriété user absente" });
+    }
+  })
 // ** Exercice 1.2 **
 // Route pour faire une authentification initiale et obtenir les
 // informations du compte utilisateur.
