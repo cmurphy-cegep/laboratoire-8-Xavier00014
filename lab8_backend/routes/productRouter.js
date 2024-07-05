@@ -62,6 +62,8 @@ router.get('/:id/image', (req, res, next) => {
 });
 
 
+const passport = require('passport');
+
 // POST pour ajout d'un nouveau produit
 // ** Exercice 1.3 **
 //
@@ -75,8 +77,11 @@ router.get('/:id/image', (req, res, next) => {
 // On peut utiliser la propriété req.user pour obtenir les informations du compte authentifié.
 //
 // Au besoin, référez-vous au module listeDifussionRouter.js dans l'exemple de code du cours 19.
-router.post('/',
+router.post('/', passport.authenticate('basic', { session: false }),
     (req, res, next) => {
+        if(!req.user.isAdmin){
+            return next(new HttpError(403, 'Accès invalide'));
+        }
         const id = req.body.id;
         if (!id || id === '') {
             // Le return fait en sorte qu'on n'exécutera pas le reste de la fonction
@@ -111,8 +116,11 @@ router.post('/',
 // ** Exercice 1.3 **
 // Approche similaire que pour le POST ci-haut. La modification d'un produit
 // doit être refusée pour les comptes non-administrateurs (avec un statut HTTP 403).
-router.put('/:id',
+router.put('/:id', passport.authenticate('basic', { session: false }),
     (req, res, next) => {
+        if(!req.user.isAdmin){
+            return next(new HttpError(403, 'Accès invalide'));
+        }
         const id = req.params.id;
         if (!id || id === '') {
             return next(new HttpError(400, 'Le paramètre id est requis'));
@@ -148,8 +156,11 @@ router.put('/:id',
 // ** Exercice 1.3 **
 // Approche similaire que pour le POST ci-haut. Le retrait d'un produit
 // doit être refusée pour les comptes non-administrateurs (avec un statut HTTP 403).
-router.delete('/:id',
+router.delete('/:id', passport.authenticate('basic', { session: false }),
     (req, res, next) => {
+        if(!req.user.isAdmin){
+            return next(new HttpError(403, 'Accès invalide'));
+        }
         const id = req.params.id;
         if (!id || id === '') {
             return next(new HttpError(400, 'Le paramètre id est requis'));
@@ -170,11 +181,14 @@ router.delete('/:id',
 // ** Exercice 1.3 **
 // Approche similaire que pour le POST ci-haut. Le changement d'image d'un produit
 // doit être refusé pour les comptes non-administrateurs (avec un statut HTTP 403).
-router.post('/:id/image',
+router.post('/:id/image', passport.authenticate('basic', { session: false }),
     // Fonction middleware de multer pour gérer l'upload d'un fichier dans ce endpoint.
     // Cet appel de middleware doit venir après celui de l'authentification.
     upload.single('product-image'), // doit correspondre à l'id du champ dans le formulaire html
     (req, res, next) => {
+        if(!req.user.isAdmin){
+            return next(new HttpError(403, 'Accès invalide'));
+        }
         const id = req.params.id;
         if (!id || id === '') {
             // Le return fait en sorte qu'on n'exécutera pas le reste de la fonction
