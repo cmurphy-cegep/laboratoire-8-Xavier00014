@@ -165,41 +165,42 @@ export default {
             // Modifier cette méthode afin de soumettre une requête HTTP POST
             // authentifiée au back-end avec le compte de l'utilisateur ou
             // utilisatrice présentement connecté(e).
+            if(session.user){
+                const commande = {
+                    userId: session.username, // ** Exercice 2.2 : à remplacer par l'utilisateur/utilisatrice connecté(e) **
+                    paiement: {
+                        nomCarteCredit: this.nomPaiement,
+                        noCarteCredit: this.carteCredit,
+                        expCarteCredit: this.dateExp
+                    },
+                    modeExp: this.modeExpedition,
+                    adresse: {
+                        nom: this.nomExpedition,
+                        adresse: this.adresse,
+                        ville: this.ville,
+                        province: this.province,
+                        codePostal: this.codePostal
+                    }
+                };
 
-            const commande = {
-                userId: 'josbleau', // ** Exercice 2.2 : à remplacer par l'utilisateur/utilisatrice connecté(e) **
-                paiement: {
-                    nomCarteCredit: this.nomPaiement,
-                    noCarteCredit: this.carteCredit,
-                    expCarteCredit: this.dateExp
-                },
-                modeExp: this.modeExpedition,
-                adresse: {
-                    nom: this.nomExpedition,
-                    adresse: this.adresse,
-                    ville: this.ville,
-                    province: this.province,
-                    codePostal: this.codePostal
-                }
-            };
-
-            fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(commande)
-            }).then((response) => {
-                if (response.ok) {
-                    alert("La commande a bien été reçue, merci d'avoir acheté au Panier Vert !");
-                    this.cart.fetchCart();
-                    this.reinitialiserFormulaire();
-                } else {
-                    throw new Error(`Erreur ${response.status}`);
-                }
-            }).catch((error) => {
-                console.error("Erreur", error);
-            });
+                fetch("/api/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(commande)
+                }).then((response) => {
+                    if (response.ok) {
+                        alert("La commande a bien été reçue, merci d'avoir acheté au Panier Vert !");
+                        this.cart.fetchCart();
+                        this.reinitialiserFormulaire();
+                    } else {
+                        throw new Error(`Erreur ${response.status}`);
+                    }
+                }).catch((error) => {
+                    console.error("Erreur", error);
+                });
+            }
         },
         validerNomPaiement() {
             if (this.nomPaiement === '') {

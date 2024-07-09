@@ -10,12 +10,35 @@
 -->
 <template>
     <div class="boxed-left">
-        À compléter ...
+        <form @submit.prevent="soumettreInfos">
+            <label for="name">name</label>
+            <input type="text" v-model.trim="name">
+            <label for="password">password</label>
+            <input type="password" v-model.trim="password">
+            <button>connexion</button>
+        </form>
     </div>
 </template>
 
 <script>
-  // À compléter ...
+import session from '../session';
+
+export default {
+    data() {
+        return {
+            name: '',
+            password: '',
+        }
+    },
+    methods: {
+        soumettreInfos() {
+            let user = session.login(this.name, this.password);
+            user.then(() => {
+                console.log("conecter");
+            });
+        }
+    }
+}
 </script>
 
 <style scoped>

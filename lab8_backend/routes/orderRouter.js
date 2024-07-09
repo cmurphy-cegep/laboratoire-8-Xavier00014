@@ -9,12 +9,19 @@ const orderQueries = require("../queries/OrderQueries");
 // Active l'authentification pour toutes les routes (chemins d'URL) servis par cet 
 // objet routeur
 
+const passport = require('passport');
+router.use(passport.authenticate('basic', { session: false }));
+
+
 // GET pour obtenir toutes les commandes
 // ** Exercice 1.5.1 **
 // Sécurisez adéquatement cette ressource afin que seuls les comptes administrateur puissent
 // y avoir accès. Toute autre tentative de la part d'un compte client normal doit être
 // refusée avec un statut HTTP 403 Forbidden.
 router.get('/', (req, res, next) => {
+    if(req.user.isAdmin !== true){
+        throw new HttpError(403, "Panier est pas accesible");
+    }
     orderQueries.getAllOrders().then(orders => {
         res.json(orders);
     }).catch(err => {
@@ -25,6 +32,9 @@ router.get('/', (req, res, next) => {
 
 // POST pour soumettre une nouvelle commande
 router.post('/', (req, res, next) => {
+    if(req.user.userAccountId !== req.params.userId || req.user.isAdmin !== true){
+        throw new HttpError(403, "Commande n'est pas accesible");
+    }
     // ** Exercice 1.5.2 **
     // Un utilisateur ne doit pouvoir passer une commande que pour son propre panier. Le corps de la
     // requête HTTP contient le champ userId qui identifie quel est le panier à utiliser pour passer

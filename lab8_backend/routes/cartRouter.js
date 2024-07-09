@@ -12,13 +12,18 @@ const cartQueries = require("../queries/CartQueries");
 // gérée par celui-ci ne doit être accessible publiquement.
 // Référez-vous au besoin au module contactRouter.js dans les exemples du cours 19.
 
+const passport = require('passport');
+router.use(passport.authenticate('basic', { session: false }));
+
 
 router.get('/:userId', (req, res, next) => {
     try {
         if (!req.params.userId || req.params.userId === '') {
             throw new HttpError(400, "Le paramètre userId doit être spécifié");
         }
-
+        if(req.user.userAccountId !== req.params.userId || req.user.isAdmin !== true){
+            throw new HttpError(403, "Panier est pas accesible");
+        }
         // ** Exercice 1.4 **
         // Il faut valider si le compte authentifié essaie d'accéder à son propre panier.
         // Pour cela, on peut comparer l'identifiant du compte (req.user.userAccountId)
@@ -52,7 +57,9 @@ router.put('/:userId/:productId', (req, res, next) => {
         if (!req.params.userId || req.params.userId === '') {
             throw new HttpError(400, "Le paramètre userId doit être spécifié");
         }
-
+        if(req.user.userAccountId !== req.params.userId || req.user.isAdmin !== true){
+            throw new HttpError(403, "Panier est pas accesible");
+        }
         // ** Exercice 1.4 **
         // La même logique d'autorisation que pour le GET d'un panier s'applique ici :
         // - Un utilisateur non-administrateur ne peut modifier que son propre panier
@@ -87,7 +94,9 @@ router.delete('/:userId/:productId', (req, res, next) => {
         if (!req.params.userId || req.params.userId === '') {
             throw new HttpError(400, "Le paramètre userId doit être spécifié");
         }
-
+        if(req.user.userAccountId !== req.params.userId || req.user.isAdmin !== true){
+            throw new HttpError(403, "Panier est pas accesible");
+        }
         // ** Exercice 1.4 **
         // La même logique d'autorisation que pour le GET d'un panier s'applique ici :
         // - Un utilisateur non-administrateur ne peut modifier que son propre panier
@@ -117,7 +126,9 @@ router.delete('/:userId', (req, res, next) => {
         if (!req.params.userId || req.params.userId === '') {
             throw new HttpError(400, "Le paramètre userId doit être spécifié");
         }
-
+        if(req.user.userAccountId !== req.params.userId || req.user.isAdmin !== true){
+            throw new HttpError(403, "Panier est pas accesible");
+        }
         // ** Exercice 1.4 **
         // La même logique d'autorisation que pour le GET d'un panier s'applique ici :
         // - Un utilisateur non-administrateur ne peut supprimer que son propre panier
